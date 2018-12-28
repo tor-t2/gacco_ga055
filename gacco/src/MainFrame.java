@@ -17,6 +17,7 @@ public class MainFrame extends Frame implements WindowListener {
 	@Override
 	public void windowClosing(WindowEvent e) {
 		// TODO 自動生成されたメソッド・スタブ
+		this.dispose();
 
 	}
 
