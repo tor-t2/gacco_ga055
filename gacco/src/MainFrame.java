@@ -1,4 +1,7 @@
 import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.CheckboxGroup;
+import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Label;
@@ -18,15 +21,29 @@ public class MainFrame extends Frame implements WindowListener, ActionListener {
 	}
 	private Panel panel;
 	private Button deleteButton;
-	private String[] labels= {"線の色","塗りつぶしの色"};
+	private CheckboxGroup checkBoxGroup;
+	private Checkbox[] checkbox = new Checkbox[2];
+	private Choice[] choice = new Choice[2];
 	/* コンストラクタ */
 	MainFrame(){
 		panel = new Panel();
 		panel.setBackground(Color.LIGHT_GRAY);
 		this.add(panel, "North");
-		for(int i=0; i<labels.length;i++) {
-			Label label = new Label(labels[i]);
-			panel.add(label);
+		checkBoxGroup = new CheckboxGroup();
+		checkbox[0]=new Checkbox("円", checkBoxGroup, true);
+		checkbox[1]=new Checkbox("四角形", checkBoxGroup, false);
+		String[] labelTexts= {"線の色","塗りつぶしの色"};
+		for(int i=0;i<checkbox.length;i++) {
+			panel.add(checkbox[i]);
+		}
+		for(int i=0; i<labelTexts.length;i++) {
+			panel.add(new Label(labelTexts[i]));
+			choice[i] = new Choice();
+			panel.add(choice[i]);
+			choice[i].addItem("赤");
+			choice[i].addItem("緑");
+			choice[i].addItem("青");
+			choice[i].addItem("黒");
 		}
 		deleteButton = new Button("削除");
 		deleteButton.addActionListener(this);
