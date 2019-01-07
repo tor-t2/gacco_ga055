@@ -4,14 +4,22 @@ import java.awt.CheckboxGroup;
 import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.Label;
 import java.awt.Panel;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-public class MainFrame extends Frame implements WindowListener, ActionListener {
+public class MainFrame extends Frame
+	implements WindowListener, ActionListener, MouseListener, MouseMotionListener {
 	public static void main(String[] args) {
 		MainFrame frame = new MainFrame();
 		frame.setSize(640, 480);
@@ -24,6 +32,10 @@ public class MainFrame extends Frame implements WindowListener, ActionListener {
 	private CheckboxGroup checkBoxGroup;
 	private Checkbox[] checkbox = new Checkbox[2];
 	private Choice[] choice = new Choice[2];
+	private Point p1=null;
+	private Figure currentFigure = null;
+	private Color colors[] = {Color.RED, Color.GREEN, Color.BLUE, Color.BLACK};
+	private ArrayList<Figure> figures = new ArrayList<Figure>();
 	/* コンストラクタ */
 	MainFrame(){
 		panel = new Panel();
@@ -32,23 +44,36 @@ public class MainFrame extends Frame implements WindowListener, ActionListener {
 		checkBoxGroup = new CheckboxGroup();
 		checkbox[0]=new Checkbox("円", checkBoxGroup, true);
 		checkbox[1]=new Checkbox("四角形", checkBoxGroup, false);
-		String[] labelTexts= {"線の色","塗りつぶしの色"};
 		for(int i=0;i<checkbox.length;i++) {
 			panel.add(checkbox[i]);
 		}
+		String[] labelTexts= {"線の色","塗りつぶしの色"};
+		String[] colorNames= {"赤","緑","青","黒"};
 		for(int i=0; i<labelTexts.length;i++) {
 			panel.add(new Label(labelTexts[i]));
 			choice[i] = new Choice();
 			panel.add(choice[i]);
-			choice[i].addItem("赤");
-			choice[i].addItem("緑");
-			choice[i].addItem("青");
-			choice[i].addItem("黒");
+			for(int j=0;j<colorNames.length;j++) {
+				choice[i].addItem(colorNames[j]);
+			}
 		}
 		deleteButton = new Button("削除");
 		deleteButton.addActionListener(this);
 		panel.add(deleteButton);
 		addWindowListener(this);
+		addMouseListener(this);
+		addMouseMotionListener(this);
+	}
+	public void paint(Graphics g) {
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, this.getWidth(), this.getHeight());
+		for(Iterator<Figure> it = figures.iterator(); it.hasNext();) {
+			Figure fig = it.next();
+			fig.draw(g);
+		}
+		if(this.currentFigure != null) {
+			this.currentFigure.draw(g);
+		}
 	}
 
 	@Override
@@ -90,8 +115,70 @@ public class MainFrame extends Frame implements WindowListener, ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == deleteButton) {
-			System.out.println("削除ボタンが押されました。");
+			if(this.figures.isEmpty() == false) {
+				this.figures.remove(this.figures.size()-1);
+				repaint();
+			}
 		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		p1 = e.getPoint();
+		Color lineColor = colors[choice[0].getSelectedIndex()];
+		Color fillColor = colors[choice[1].getSelectedIndex()];
+		if(checkbox[0].getState()) {
+			this.currentFigure = new Oval();
+		}else if(checkbox[1].getState()) {
+			this.currentFigure = new Rect();
+		}
+		this.currentFigure.setColors(lineColor, fillColor);
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		if(this.currentFigure != null) {
+			Point p2 = e.getPoint();
+			if(this.p1.x != p2.x && this.p1.y != p2.y) {
+				this.currentFigure.setFromPoints(p1, p2);
+				this.currentFigure.draw(this.getGraphics());
+				this.figures.add(currentFigure);
+				this.repaint();
+			}
+			this.currentFigure = null;
+			p1 = null;
+		}
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO 自動生成されたメソッド・スタブ
+
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO 自動生成されたメソッド・スタブ
+
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		Point p2 = e.getPoint();
+		if(this.currentFigure != null) {
+			this.currentFigure.setFromPoints(p1, p2);
+			repaint();
+		}
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		//System.out.println("マウス移動 ("+e.getPoint().getX()+","+e.getPoint().getY()+")");
+
 	}
 
 }
