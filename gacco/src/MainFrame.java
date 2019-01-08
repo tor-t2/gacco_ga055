@@ -3,9 +3,13 @@ import java.awt.Checkbox;
 import java.awt.CheckboxGroup;
 import java.awt.Choice;
 import java.awt.Color;
+import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Label;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
 import java.awt.Panel;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -15,6 +19,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -36,6 +43,10 @@ public class MainFrame extends Frame
 	private Figure currentFigure = null;
 	private Color colors[] = {Color.RED, Color.GREEN, Color.BLUE, Color.BLACK};
 	private ArrayList<Figure> figures = new ArrayList<Figure>();
+	private MenuItem save;
+	private MenuItem exit;
+	private MenuItem load;
+
 	/* コンストラクタ */
 	MainFrame(){
 		panel = new Panel();
@@ -63,6 +74,17 @@ public class MainFrame extends Frame
 		addWindowListener(this);
 		addMouseListener(this);
 		addMouseMotionListener(this);
+		/* メニューの追加 */
+		MenuBar menu = new MenuBar();
+		setMenuBar(menu);
+		Menu fileMenu = menu.add(new Menu("ファイル"));
+		save = fileMenu.add(new MenuItem("保存"));
+		load = fileMenu.add(new MenuItem("読み込み"));
+		fileMenu.addSeparator();
+		exit = fileMenu.add(new MenuItem("終了"));
+		save.addActionListener(this);
+		load.addActionListener(this);
+		exit.addActionListener(this);
 	}
 	public void paint(Graphics g) {
 		g.setColor(Color.WHITE);
@@ -119,6 +141,37 @@ public class MainFrame extends Frame
 				this.figures.remove(this.figures.size()-1);
 				repaint();
 			}
+		}else if(e.getSource() == save) {
+			FileDialog fileDialog = new FileDialog(this,"ファイルを保存する",FileDialog.SAVE);
+			fileDialog.setDirectory(".");
+			fileDialog.setFile("draw.csv");
+			fileDialog.setVisible(true);
+			if(fileDialog.getFile() != null) {
+				File file = new File(fileDialog.getDirectory(), fileDialog.getFile());
+				PrintWriter printWriter = null;
+				try {
+					printWriter = new PrintWriter(file);
+					for(Figure f : this.figures) {
+						printWriter.println(f.toCSV());
+					}
+				} catch (FileNotFoundException e1) {
+					e1.printStackTrace();
+				} finally {
+					if(printWriter != null) {
+						printWriter.close();
+					}
+				}
+			}
+		}else if(e.getSource() == load) {
+			//System.out.println("読み込みメニュー実行");
+			FileDialog fileDialog = new FileDialog(this, "ファイルを読み込む", FileDialog.LOAD);
+			fileDialog.setDirectory(".");
+			fileDialog.setVisible(true);
+			if(fileDialog.getFile() != null) {
+				File file = new File(fileDialog.getDirectory(), fileDialog.getFile());
+			}
+		}else if(e.getSource() == exit) {
+			this.dispose();
 		}
 	}
 

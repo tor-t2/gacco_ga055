@@ -10,6 +10,16 @@ public abstract class Figure {
 	private Color lineColor;
 	private Color fillColor;
 	public abstract void draw(Graphics g);
+	private String colorToCSV(Color color) {
+		return String.format("%d,%d,%d", color.getRed(),color.getGreen(),color.getBlue());
+	}
+	public String toCSV() {
+		return this.getClass().getSimpleName()+","
+				+this.getX()+","+this.getY()+","
+				+this.getWidth()+","+this.getHeight()+","
+				+this.colorToCSV(getLineColor())+","
+				+this.colorToCSV(getFillColor());
+	}
 	public int getX() {
 		return x;
 	}
